@@ -26,10 +26,23 @@ class Table {
         this.options = options || {};
         this.originalData = [...data];
         this.data = data;
+        this.insertRows = [];
 
         this.sections = {}
 
         this.render();
+    }
+
+    destroy(removeData = false) {
+        this.el.innerHTML = '';
+
+        if (removeData) {
+            this.data = [];
+            this.rows = [];
+            this.headers = [];
+            this.columns = [];
+            this.insertRows = [];
+        }
     }
 
     render() {
@@ -37,7 +50,7 @@ class Table {
             evenColumns,
             reorder
         } = this.options;
-        this.el.innerHTML = '';
+        this.destroy();
 
         if (Array.isArray(this.options.classes)) {
             this.el.classList.add(...this.options.classes);
@@ -60,7 +73,20 @@ class Table {
             };
 
             const dragStart = ({ event }) => {
+                const tempTr = document.createElement('tr');
+                const td = document.createElement('td');
+                td.colSpan = this.headers.length;
+                td.style.height = '100%';
+                td.classList.add('bg-secondary');
+                tempTr.appendChild(td);
+
+                tempTr.id = 'temp-tr';
+
                 const tr = event.target.closest('tr');
+                tempTr.style.height = `${tr.offsetHeight}px`;
+                tr.style.transition = '';
+                tr.insertAdjacentElement('afterend', tempTr);
+
                 tr.style.cursor = 'grabbing';
                 tr.style.userSelect = 'none';
                 tr.style.position = 'fixed';
@@ -80,10 +106,32 @@ class Table {
 
                 tr.style.transform = `translate(${dx}px, ${dy}px)`;
 
-                // const swap = document.elementFromPoint(x, y).closest('tr[data-swap="true"]');
-                // if (swap) {
-                //     swap.style.transform = `translateY(${dy}px)`;
-                // }
+                this.insertRows.forEach(r => {
+                    r.style.display = 'none';
+                });
+
+                this.el.querySelectorAll('tbody tr').forEach(r => {
+                    if (r === tr) return;
+
+                    const rRect = r.getBoundingClientRect();
+                    const trRect = tr.getBoundingClientRect();
+
+                    r.querySelectorAll('td').forEach(td => {
+                        td.classList.remove('bg-primary');
+                    });
+
+                    const above = r.previousElementSibling;
+                    const below = r.nextElementSibling;
+
+                    if ((rRect.top - rRect.height) < (trRect.top + trRect.height / 2) &&
+                        (rRect.bottom + rRect.height) > (trRect.top + trRect.height / 2)) {
+                        r.querySelectorAll('td').forEach(td => {
+                            td.classList.add('bg-primary');
+                        });
+                        // above.style.display = 'block';
+                        // below.style.display = 'block';
+                    }
+                });
             };
 
             const dragEnd = (e) => {
@@ -91,7 +139,25 @@ class Table {
                 tr.style.cursor = '';
                 tr.style.userSelect = '';
                 tr.style.position = '';
+
+                // animate back to original position
+                tr.style.transition = 'transform 0.2s ease-in-out';
                 tr.style.transform = '';
+
+                const tempTr = this.el.querySelector('#temp-tr');
+                if (tempTr) tempTr.remove();
+
+
+                this.insertRows.forEach(r => {
+                    r.style.display = 'none';
+                });
+
+
+                this.rows.forEach(r => {
+                    r.el.querySelectorAll('td').forEach(td => {
+                        td.classList.remove('bg-primary');
+                    });
+                });
             };
 
             this.options.trAttributes.push({
@@ -170,13 +236,34 @@ class Table {
         const thead = document.createElement('thead');
         const tr = document.createElement('tr');
 
+        const {
+            fixedHeaders
+        } = this.options;
+
         this.columns = this.headers.map(h => {
             if (!h) return;
             const th = new TableHeader(h.title);
+
+            if (h.sort) {
+                th.el.addEventListener('click', () => {
+                    this.sort(h.sort);
+                });
+            }
+
+            if (h.minimize) {
+
+            }
+
             tr.appendChild(th.el);
 
             return new TableColumn([th]);
         }).filter(h => h);
+
+        if (fixedHeaders) {
+            tr.style.position = 'sticky';
+            tr.style.top = 0;
+            tr.style.zIndex = 1;
+        }
 
         thead.appendChild(tr);
         this.el.appendChild(thead);
@@ -210,6 +297,8 @@ class Table {
                 tr.appendChild(td);
                 tbody.appendChild(tr);
                 fullSpanPos++;
+
+                this.insertRows.push(tr);
                 return;
             }
             i++;
@@ -322,6 +411,26 @@ class Table {
         this.el.appendChild(tbody);
     }
 
+
+
+
+
+
+
+    // sorting
+    sort(method, reverse = false) {
+        // sort this.data the same way as this.data
+        const { rows } = this;
+
+        let newRows = rows.map((r, i) => {
+            r.__data = this.data[i];
+            return r;
+        });
+
+        newRows = newRows.sort((a, b) => {
+            return method(a, b);
+        });
+    }
 }
 
 class TableRow {

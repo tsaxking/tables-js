@@ -42,8 +42,7 @@
             }, {
                 title: 'Age',
                 getData: (row) => row.age,
-                sort: (a, b) => a.age - b.age,
-                minimize: true
+                sort: (a, b) => a.age - b.age
             }];
 
             const myTable = new Table(table, headers, data, {
@@ -53,8 +52,9 @@
                     'table-hover',
                     'table-bordered'
                 ],
-                reorder: true,
-                evenColumns: true
+                // reorder: true,
+                evenColumns: true,
+                fixedHeaders: true
             });
         </script>
     </main>
