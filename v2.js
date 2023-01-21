@@ -16,7 +16,6 @@
 class Table {
     constructor(table, headers, data, options) {
         if (!table.querySelector) {
-            console.log(table);
             throw new Error('Table must be an HTML element');
         }
         this.el = table;
@@ -244,14 +243,62 @@ class Table {
             if (!h) return;
             const th = new TableHeader(h.title);
 
-            if (h.sort) {
-                th.el.addEventListener('click', () => {
-                    this.sort(h.sort);
+            if (h.minimize) {
+                const i = document.createElement('i');
+                i.classList.add('material-icons');
+                if (h.__minimized) {
+                    i.innerText = 'chevron_right';
+                    th.el.innerHTML = '';
+
+                    // const el = th.el.cloneNode();
+
+                    // const newTh = document.createElement('th');
+                    // const div = document.createElement('div');
+                    // div.classList.add('ws-nowrap', 'd-flex', 'align-items-center', 'justify-content-space-between', 'w-100');
+                    // div.appendChild(el);
+                    // div.appendChild(i);
+                    // newTh.appendChild(div);
+                    // newTh.classList.add('ws-nowrap', 'w-100');
+
+                    // th.el = newTh;
+                } else i.innerText = 'chevron_left';
+
+                i.style.cursor = 'pointer';
+
+                i.addEventListener('click', () => {
+                    if (h.__minimized) {
+                        i.innerText = 'chevron_left';
+                        h.__minimized = false;
+                        h.__reverse = 0;
+                    } else {
+                        i.innerText = 'chevron_right';
+                        h.__minimized = true;
+                    }
+
+                    this.render();
                 });
+
+                th.el.appendChild(i);
+                th.el.classList.add('ws-nowrap');
             }
 
-            if (h.minimize) {
+            if (h.sort) {
+                th.el.addEventListener('click', () => {
+                    let { __reverse } = h;
+                    h.__sorted = true;
 
+                    if (typeof __reverse === 'undefined') __reverse = true;
+                    else if (+__reverse === 1) __reverse = false;
+                    else if (+__reverse === 0) {
+                        __reverse = undefined;
+                        h.__sorted = false;
+                    }
+
+                    h.__reverse = __reverse;
+
+                    this.data = this.sort(h.sort, __reverse);
+                    this.render();
+                });
             }
 
             tr.appendChild(th.el);
@@ -310,6 +357,7 @@ class Table {
                     rowPos: i,
                     colPos,
                     header: h.title || h.name || h.key,
+                    minimized: h.__minimized,
                 });
 
                 this.columns[j].cells.push(c);
@@ -354,6 +402,12 @@ class Table {
                 if (Array.isArray(colGroup)) {
                     let col = colGroup.find(c => c.index == j);
                     if (col) c.el.classList.add(...col.classes);
+                }
+
+                if (h.__sorted) {
+                    if (this.options.sort) {
+                        if (Array.isArray(this.options.sort.classes)) c.el.classList.add(...this.options.sort.classes);
+                    }
                 }
 
                 try {
@@ -418,18 +472,22 @@ class Table {
 
 
     // sorting
-    sort(method, reverse = false) {
+    sort(method, reverse) {
+        if (typeof method !== 'function') throw new Error('sort method must be a function');
+
+        if (typeof reverse !== 'boolean') {
+            // cancel sort
+            return this.originalData;
+        }
+
         // sort this.data the same way as this.data
         const { rows } = this;
 
-        let newRows = rows.map((r, i) => {
-            r.__data = this.data[i];
-            return r;
-        });
+        const newRows = rows.sort(method);
 
-        newRows = newRows.sort((a, b) => {
-            return method(a, b);
-        });
+        if (reverse) newRows.reverse();
+
+        return newRows.map(r => r.data);
     }
 }
 
@@ -460,7 +518,8 @@ class TableColumn {
 class TableCell {
     constructor(type, header, row, {
         rowPos,
-        colPos
+        colPos,
+        minimized
     }) {
         this.content = header.getData ? header.getData(row) : row[header.title || header.name || header.key];
         this.type = type;
@@ -468,7 +527,8 @@ class TableCell {
         this.rowPos = rowPos;
         this.headerTitle = header.title;
 
-        this.render();
+        if (!minimized) this.render();
+        else this.el = document.createElement('td');
     }
 
     render() {
