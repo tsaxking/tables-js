@@ -1,7 +1,17 @@
 {
     "name": "tables-js",
     "version": "1.1.1",
-    "description": "",
+    "description": "Simple and customizable HTML table generator for vanilla JavaScript",
     "author": "",
-    "license": "ISC"
+    "license": "ISC",
+    "keywords": [
+        "tables",
+        "table",
+        "table-js",
+        "tablejs",
+        "table.js",
+        "html tables",
+        "html table",
+        "table generator"
+    ]
 }
