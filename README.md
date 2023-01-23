@@ -1,4 +1,4 @@
-# tables.js Version 1.1.*
+# tables.js Version 1.1.x
 
 ## Installation
 
@@ -283,8 +283,8 @@ const headers = [{
 ##### Event Listeners
 All lisener arrays are structured the same way. Each object must have the following properties:
 - `type` is a string that is the name of the event.
-- `callback` (v1.1.*) is a function that is the listener that passes in the event as a parameter. (Uses a different data structure than v1.0.*)
-- `action` (v1.0.*) is a function that is the listener that passes in the event as a parameter.
+- `callback` (v1.1.x) is a function that is the listener that passes in the event as a parameter. (Uses a different data structure than v1.0.x)
+- `action` (v1.0.x) is a function that is the listener that passes in the event as a parameter.
 
 `header.thListeners` is an array of objects that will be added to the `<th>` element.
 `header.tdListeners` is an array of objects that will be added to each `<td>` element in this column.
@@ -295,7 +295,7 @@ const headers = [{
     title: 'Name',
     thListeners: [{
         event: 'click', // runs when the `<th>` is clicked
-        callback: (event) => { // v1.1.*
+        callback: (event) => { // v1.1.x
             /* 
                 event is an event object with the following expanded property:
                 - event.__row = TableRow object
@@ -309,7 +309,7 @@ const headers = [{
             event, // event object
             row, // data row (custom data)
             tableRow // TableRow object
-        }) => { // v1.0.*
+        }) => { // v1.0.x
             console.log(event);
         }
     }]
