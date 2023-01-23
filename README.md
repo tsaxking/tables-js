@@ -465,7 +465,7 @@ const myTable = Table.fromTSV(table, tsv, options);
 ```
 ### HTML
 ```javascript
-const myTable = Table.from(table, html, options, 'html'); // 'html' may not be necessary.
+const myTable = Table.from(table /* already populated table */, null /* Data is in the prerendered table */, options, 'html'); // 'html' may not be necessary.
 // or
-const myTable = Table.fromHTML(table, html, options);
+const myTable = Table.fromHTML(table, options);
 ```
