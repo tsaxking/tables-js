@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>Title</title>
+    <title>Tables.js</title>
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -87,7 +87,7 @@
                 sort: true
             }];
 
-            const myTable = new Table(table, headers, data, {
+            const options = {
                 classes: [
                     'table',
                     'table-striped',
@@ -120,7 +120,23 @@
                 //     onChange: (event) => {},
                 //     onCancel: (event) => {}
                 // },
-            });
+            }
+
+            // const myTable = new Table(table, headers, data, options);
+
+            const csv = `id,firstname,lastname,email,email2,profession
+                100,Mallory,Seligman,Mallory.Seligman@yopmail.com,Mallory.Seligman@gmail.com,doctor
+                101,Corene,Toor,Corene.Toor@yopmail.com,Corene.Toor@gmail.com,firefighter
+                102,Orelia,Rillings,Orelia.Rillings@yopmail.com,Orelia.Rillings@gmail.com,doctor
+                103,Cherilyn,Koziara,Cherilyn.Koziara@yopmail.com,Cherilyn.Koziara@gmail.com,developer
+                104,Ada,Radu,Ada.Radu@yopmail.com,Ada.Radu@gmail.com,doctor
+                105,Nannie,Uund,Nannie.Uund@yopmail.com,Nannie.Uund@gmail.com,firefighter
+                106,Queenie,Sancho,Queenie.Sancho@yopmail.com,Queenie.Sancho@gmail.com,police officer
+                107,Robbi,Neils,Robbi.Neils@yopmail.com,Robbi.Neils@gmail.com,doctor
+                108,Hollie,O'Neill,Hollie.O'Neill@yopmail.com,Hollie.O'Neill@gmail.com,police officer
+                109,Corina,Yerkovich,Corina.Yerkovich@yopmail.com,Corina.Yerkovich@gmail.com,developer`;
+
+            const myTable = Table.from(table, csv, options);
         </script>
     </main>
     <footer>

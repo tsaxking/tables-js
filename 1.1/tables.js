@@ -1,3 +1,50 @@
+const parseSV = (str, delimeter, escape) => {
+    // return [{a: 1, b: 2}, {a: 3, b: 4}]
+    // include " in the string to escape it
+
+    // headers is first row, it could have " in it to escape commas
+    // data is the rest of the rows
+
+    // split the string into rows
+    const data = str.split('\n');
+
+    // get the headers
+    const headers = data[0].split(delimeter).map((h) => {
+        if (h[0] === escape && h[h.length - 1] === escape) {
+            return h.substring(1, h.length - 1);
+        } else {
+            return h;
+        }
+    });
+
+    data.shift();
+
+    // get the data
+    return data.map((row) => {
+        const splitRow = row.split(delimeter).map(r => {
+            if (r[0] === escape && r[r.length - 1] === escape) {
+                return r.substring(1, r.length - 1);
+            } else {
+                return r;
+            }
+        });
+
+        console.log(splitRow);
+
+        return splitRow.reduce((acc, curr, i) => {
+            acc[headers[i]] = curr.trim();
+            return acc;
+        }, {});
+    });
+}
+
+const parseHTML = (str) => {
+    const div = document.createElement('div');
+    div.innerHTML = str;
+    return div.firstChild;
+}
+
+
 /**
  *  A class that handles the state of a table
  */
@@ -499,7 +546,7 @@ class Table {
 
         this.stack.onReject = () => {}
 
-        this.stack.addState(this);
+        if (this.options.__render !== false) this.stack.addState(this);
     }
 
     /**
@@ -1173,8 +1220,8 @@ class Table {
             r.insertRows.above = this.insertRows[i * 2];
             r.insertRows.below = this.insertRows[i * 2 + 1];
 
-            r.insertRows.above.row = r;
-            r.insertRows.below.row = r;
+            if (r.insertRows.above) r.insertRows.above.row = r;
+            if (r.insertRows.below) r.insertRows.below.row = r;
         });
 
         this.el.appendChild(tbody);
@@ -1291,6 +1338,127 @@ class Table {
      */
     get json() {
         return JSON.stringify(this.content.filter((_, i) => i !== 0));
+    }
+
+    /**
+     * Creates a table from various data types (can automatically detect the type)
+     * @param {HTMLElement} table - The table element (if using html, must be already populated)
+     * @param {String} data - The data to use to populate the table (not needed for html)
+     * @param {String} type - The type of data (json, csv, tsv, html) (if not specified, will be automatically detected, but this may not work for all cases)
+     * @returns {Table} The table
+     */
+    static from(table, data, options, type) {
+        if (!table) {
+            throw new Error('Table.from() requires a table element');
+        }
+
+        if (!table.querySelector) {
+            throw new Error('Table.from() requires a table element');
+        }
+
+        if (!type) {
+            if (!data) type = 'html';
+            else {
+                try {
+                    JSON.parse(data);
+                    type = 'json';
+                } catch {
+                    // get all commas
+                    const commas = data.split(',').length - 1;
+                    // get all tabs
+                    const tabs = data.split('\t').length - 1;
+
+                    if (commas > tabs) type = 'csv';
+                    else type = 'tsv';
+                }
+            }
+        }
+
+
+        switch (type) {
+            case 'json':
+                return Table.fromJSON(table, data, options);
+            case 'html':
+                return Table.fromHTML(table, options);
+            case 'csv':
+                return Table.fromCSV(table, data, options);
+            case 'tsv':
+                return Table.fromTSV(table, data, options);
+            default:
+                throw new Error('Invalid type');
+        }
+    }
+
+    /**
+     * Create a table from JSON data
+     * @param {String} data - The JSON data (must be an array of arrays or an array of objects with consistent keys)
+     * @returns {Table} The table
+     */
+    static fromJSON(table, data, options) {
+        data = JSON.parse(data);
+
+        let headers = data[0];
+
+        if (Array.isArray(headers)) {
+            headers = headers.map(h => {
+                return {
+                    title: h,
+                    getData: d => d[h]
+                }
+            });
+
+            data.shift();
+        } else {
+            headers = Object.keys(headers).map(k => {
+                return {
+                    title: k,
+                    getData: d => d[k]
+                }
+            });
+        }
+
+        data = data.map(d => {
+            if (Array.isArray(d)) {
+                return d.reduce((acc, cur, i) => {
+                    acc[headers[i].title] = cur;
+                    return acc;
+                }, {});
+            } else {
+                return d;
+            }
+        });
+
+        return new Table(table, headers, data, options);
+    }
+
+    static fromHTML(table, options) {
+        const headers = Array.from(table.querySelectorAll('thead th')).map(h => {
+            return {
+                title: h.textContent
+            }
+        });
+
+        const data = Array.from(table.querySelectorAll('tbody tr')).map(tr => {
+            return Array.from(tr.querySelectorAll('td')).reduce((acc, cur, i) => {
+                acc[headers[i].title] = cur.textContent;
+                return acc;
+            }, {});
+        });
+
+        return new Table(table, headers, data, {
+            ...options,
+            __render: false
+        });
+    }
+
+    static fromCSV(table, data, options) {
+        const json = JSON.stringify(parseSV(data, ',', '"'));
+        return Table.fromJSON(table, json, options);
+    }
+
+    static fromTSV(table, data, options) {
+        const json = JSON.stringify(parseSV(data, '\t', '"'));
+        return Table.fromJSON(table, json, options);
     }
 }
 
