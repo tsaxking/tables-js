@@ -1,4 +1,5 @@
 # tables.js Version 1.1.x
+***Note: This is a work in progress. If you find any bugs, please report them on the [GitHub repository](https://github.com/tsaxking/tables-js).***
 
 ## Installation
 
@@ -221,7 +222,7 @@ const headers = {
 };
 
 const data = [{
-    Name: 'John' // again, the case must be the same as above.
+    name: 'John'
 }];
 
 const myTable = new Table("#my-table", headers, data);
