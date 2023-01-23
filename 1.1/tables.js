@@ -1344,8 +1344,12 @@ class Table {
      * Creates a table from various data types (can automatically detect the type)
      * @param {HTMLElement} table - The table element (if using html, must be already populated)
      * @param {String} data - The data to use to populate the table (not needed for html)
+     * @param {Object} options - The options to use to create the table
      * @param {String} type - The type of data (json, csv, tsv, html) (if not specified, will be automatically detected, but this may not work for all cases)
      * @returns {Table} The table
+     * @memberof Table
+     * @since 1.0.0
+     * @public
      */
     static from(table, data, options, type) {
         if (!table) {
@@ -1392,7 +1396,11 @@ class Table {
     /**
      * Create a table from JSON data
      * @param {String} data - The JSON data (must be an array of arrays or an array of objects with consistent keys)
+     * @param {Object} options - The options to use
      * @returns {Table} The table
+     * @memberof Table
+     * @since 1.1.4
+     * @public
      */
     static fromJSON(table, data, options) {
         data = JSON.parse(data);
@@ -1431,6 +1439,15 @@ class Table {
         return new Table(table, headers, data, options);
     }
 
+    /**
+     * Create a table from rendered HTML Table
+     * @param {HTMLElement} table Element to get data from 
+     * @param {Object} options  Options to pass to the table
+     * @returns {Table}
+     * @memberof Table
+     * @since 1.1.4
+     * @public
+     */
     static fromHTML(table, options) {
         const headers = Array.from(table.querySelectorAll('thead th')).map(h => {
             return {
@@ -1451,11 +1468,31 @@ class Table {
         });
     }
 
+    /**
+     * Create a table from CSV data
+     * @param {HTMLElement} table the table element
+     * @param {String} data CSV string
+     * @param {Object} options Options to pass to the table
+     * @returns {Table}
+     * @memberof Table
+     * @public
+     * @since 1.1.4
+     */
     static fromCSV(table, data, options) {
         const json = JSON.stringify(parseSV(data, ',', '"'));
         return Table.fromJSON(table, json, options);
     }
 
+    /**
+     * Create a table from TSV data
+     * @param {HTMLElement} table the table element
+     * @param {String} data TSV string 
+     * @param {Object} options Options to pass to the table
+     * @returns {Table}
+     * @memberof Table
+     * @since 1.1.4
+     * @public
+     */
     static fromTSV(table, data, options) {
         const json = JSON.stringify(parseSV(data, '\t', '"'));
         return Table.fromJSON(table, json, options);
