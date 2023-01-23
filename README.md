@@ -443,3 +443,29 @@ Each row's data will be in `TableRow.data`.
 - Caption: Add a caption to the table
 - Insertion: Insert a row or column
 - Deletion: Delete a row or column
+
+## Generating from Various Data Types
+### JSON
+```javascript
+const myTable = Table.from(table, json, options, 'json'); // 'json' may not be necessary.
+// or
+const myTable = Table.fromJSON(table, json, options);
+```
+### CSV
+```javascript
+const myTable = Table.from(table, csv, options, 'csv'); // 'csv' may not be necessary. 
+// or
+const myTable = Table.fromCSV(table, csv, options);
+```
+### TSV
+```javascript
+const myTable = Table.from(table, tsv, options, 'tsv'); // 'tsv' may not be necessary.
+// or
+const myTable = Table.fromTSV(table, tsv, options);
+```
+### HTML
+```javascript
+const myTable = Table.from(table, html, options, 'html'); // 'html' may not be necessary.
+// or
+const myTable = Table.fromHTML(table, html, options);
+```
