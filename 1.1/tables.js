@@ -432,7 +432,11 @@ class Table {
          * @type {Array<Object>}
          * @public
          */
-        this.headers = Array.isArray(headers) ? headers : (typeof headers === 'object' ? Object.keys(headers).map(h => {
+        this.headers = Array.isArray(headers) ? headers.map(h => {
+            return {
+                title: h
+            }
+        }) : (typeof headers === 'object' ? Object.keys(headers).map(h => {
             return {
                 title: h,
                 ...headers[h]
