@@ -50,6 +50,32 @@ const options = { // optional
 
 const myTable = new Table(table, headers, data, options);
 ```
+### Generating from Various Data Types
+#### JSON
+```javascript
+const myTable = Table.from(table, json, options, 'json'); // 'json' may not be necessary as the function attempts to detect the type of data.
+// or
+const myTable = Table.fromJSON(table, json, options);
+```
+#### CSV
+```javascript
+const myTable = Table.from(table, csv, options, 'csv'); // 'csv' may not be necessary as the function attempts to detect the type of data.
+// or
+const myTable = Table.fromCSV(table, csv, options);
+```
+#### TSV
+```javascript
+const myTable = Table.from(table, tsv, options, 'tsv'); // 'tsv' may not be necessary as the function attempts to detect the type of data.
+// or
+const myTable = Table.fromTSV(table, tsv, options);
+```
+#### HTML
+```javascript
+const myTable = Table.from(table /* already populated table */, null /* Data is in the prerendered table */, options, 'html'); // 'html' may not be necessary as the function attempts to detect the type of data.
+// or
+const myTable = Table.fromHTML(table, options);
+```
+
 
 ## Custom Table Classes
 ### Table
@@ -70,6 +96,14 @@ class Table {
     render() // renders the table
     destroy(deleteData: Booean) // destroys the table (deleteData removes all data from the Table object)
     
+    /* public static methods */
+    static fromHTML(table: HTMLElement, options: Object) // creates a Table object from a populated html table
+    static fromJSON(table: HTMLElement, json: String, options: Object) // creates a Table object from a JSON string 
+    static fromCSV(table: HTMLElement, csv: String, options: Object) // creates a Table object from a CSV string
+    static fromTSV(table: HTMLElement, tsv: String, options: Object) // creates a Table object from a TSV string
+
+    static from(table: HTMLElement, data: Object | null, options: Object | null, type: String | null) // autodetects the type of data and creates a Table object from your inputs
+
     /* private methods */
     showInsertRows(TableRow) // shows the insert rows above and below the TableRow (used with reorderable tables)
     hideInsertRows() // hides the insert rows
@@ -452,29 +486,3 @@ Each row's data will be in `TableRow.data`.
 - Caption: Add a caption to the table
 - Insertion: Insert a row or column
 - Deletion: Delete a row or column
-
-## Generating from Various Data Types
-### JSON
-```javascript
-const myTable = Table.from(table, json, options, 'json'); // 'json' may not be necessary.
-// or
-const myTable = Table.fromJSON(table, json, options);
-```
-### CSV
-```javascript
-const myTable = Table.from(table, csv, options, 'csv'); // 'csv' may not be necessary. 
-// or
-const myTable = Table.fromCSV(table, csv, options);
-```
-### TSV
-```javascript
-const myTable = Table.from(table, tsv, options, 'tsv'); // 'tsv' may not be necessary.
-// or
-const myTable = Table.fromTSV(table, tsv, options);
-```
-### HTML
-```javascript
-const myTable = Table.from(table /* already populated table */, null /* Data is in the prerendered table */, options, 'html'); // 'html' may not be necessary.
-// or
-const myTable = Table.fromHTML(table, options);
-```
