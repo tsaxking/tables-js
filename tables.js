@@ -280,7 +280,7 @@ class Table_StateStack {
  * @class
  * @classdesc A class for creating a table
  * 
- * @version 1.1
+ * @since 1.1.0
  * 
  * @example
  * const table = new Table('table', [], [], {});
@@ -839,9 +839,7 @@ class Table {
 
         // JQuery DataTables
         if (this.options.dataTable || this.options.datatable) {
-            const datatableOptions = typeof this.options.dataTable == 'object' ? this.options.dataTable : typeof this.options.datatable == 'object' ? this.options.datatable : null;
-
-            $(this.el).DataTable(datatableOptions);
+            $(this.el).DataTable(this.options.dataTable || this.options.datatable);
         }
     }
 
@@ -1832,4 +1830,60 @@ class TableFooter extends TableHeader {
     constructor(...args) {
         super(...args);
     }
+}
+
+
+
+
+
+
+/**
+ * @description Creates a table from an element, headers, and data. You can add in event listeners if you like! Fully customizable
+ * @param {Element} table Table Element
+ * @param {Array} headers Header: {title: 'String', getData: (rowData) => {how to get content to place into <td></td>}, listeners: (OPTIONAL) [{type: 'listener type', action: (rowData) => {what to do on listener}}]
+ * @param {Array} data Each item is a row, structure it how you like. getData(data[n]) and action(data[n]) use this
+ * @param {Object} options (optional) see below
+ * 
+ * @returns {Table} Table Object
+ * 
+ * @version 1.0.0
+ * 
+ * @example
+ *  ```javascript
+ *  const tableOptions = {
+ *      appendTest: (row) => {}, // function: must return a boolean, if true, will append the tr to the table. Parameter is the row
+ *      trListeners: [], // array of objects: {type: 'listener type', action: ({ row, tr, event }) => { // what to do on listener}}
+ *      trAttributes: [], // array of objects: {type: 'attribute type', value: (row) => { function to get attribute }}
+ *      dataTable: false, // boolean: if true, will create a data table using jquery dataTable, this requires the table to have an id
+ *      colGroup: [], // array of objects: { index: 0, classes: ['class'] }
+ *      trClassTests: [], // array of objects: { test: (row) => { function to test row }, value: 'class' }
+ *      evenColumns: false, // boolean: if true, will make all columns the same width
+ *      trClasses: [], // array of strings: ['class1', 'class2']
+ *      onEdit: (row, column, newValue) => {} // function: what to do when a row is edited, this will make the table a spreadsheet. DO NOT USE WITH ANY OTHER OPTION
+ *  }
+ *  ```
+ */
+function setTable(table, headers, data, options) {
+    return new Table(table, headers, data, options);
+}
+
+function getTableElements(table) {
+    if (!table.querySelector) throw new Error('Table must be a node!');
+
+    let rows = [];
+
+    let thead = table.querySelector('thead');
+
+    table.querySelectorAll('tbody tr').forEach(tr => {
+        rows.push(tr);
+    });
+
+    let tfoot = table.querySelector('tfoot');
+
+    return new Table({
+        rows,
+        thead,
+        table,
+        tfoot
+    });
 }

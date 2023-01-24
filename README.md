@@ -1,10 +1,18 @@
 # tables.js Version 1.1.x
 ***Note: This is a work in progress. If you find any bugs, please report them on the [GitHub repository](https://github.com/tsaxking/tables-js).***
 
+## Description
+The power of tables.js comes from the dynamic nature of the Table class. While jQuery Datatables is a great tool, and it's customizable, I want to expand on its functionality. You can combine datatables with this tool by just setting `options.datatable = true` or `options.datatable = { ...datatableOptions }`. I have added state management and independent cell/row/column rendering through the object the Table class creates. My goal is for you to have full customizability over your tables
+
 ## Installation
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/tables-js/1.1/tables.js"></script>
+<!-- Most recent version -->
+<script src="https://cdn.jsdelivr.net/npm/tables-js/tables.min.js"></script>
+
+<!-- Specific version -->
+<script src="https://cdn.jsdelivr.net/npm/tables-js/1.1/tables.min.js"></script> <!-- Uses Table Class -->
+<script src="https://cdn.jsdelivr.net/npm/tables-js/1.0/tables.min.js"></script> <!-- Uses setTable -->
 ```
 It is recommended that tables.js be used with [Bootstrap](https://getbootstrap.com/), [jQuery](https://jquery.com/), [jQuery Datatables](https://datatables.net/), and [Material Icons](https://material.io/resources/icons/?style=baseline), but it is not required. If you want to use tables.js with Bootstrap, jQuery, and jQuery Datatables, you can use the following code:
 ```html

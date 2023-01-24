@@ -13,6 +13,10 @@
 </head>
 
 <body>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script> -->
+    <!-- <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script> -->
+    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
     <header>
         <!-- place navbar here -->
     </header>
@@ -55,36 +59,36 @@
             const headers = [{
                 title: 'ID',
                 getData: (row) => row.id,
-                minimize: true
+                // minimize: true
             }, {
                 title: 'Name',
                 getData: (row) => row.name,
-                minimize: true
+                // minimize: true
             }, {
                 title: 'Age',
                 getData: (row) => row.age,
-                sort: (a, b) => a.data.age - b.data.age
+                // sort: (a, b) => a.data.age - b.data.age
             }, {
                 title: 'Food',
                 getData: (row) => row.food,
-                sort: (a, b) => a.data.food.localeCompare(b.data.food)
+                // sort: (a, b) => a.data.food.localeCompare(b.data.food)
             }, {
                 title: 'Color',
                 getData: (row) => row.color,
-                sort: (a, b) => a.data.color.localeCompare(b.data.color)
+                // sort: (a, b) => a.data.color.localeCompare(b.data.color)
             }, {
                 title: 'Date',
                 getData: (row) => row.date,
-                sort: (a, b) => a.data.date - b.data.date,
-                minimize: true
+                // sort: (a, b) => a.data.date - b.data.date,
+                // minimize: true
             }, {
                 title: 'Bool1',
                 getData: (row) => row.bool,
-                sort: (a, b) => a.data.bool - b.data.bool
+                // sort: (a, b) => a.data.bool - b.data.bool
             }, {
                 title: 'Bool2',
                 getData: (row) => row.bool2,
-                sort: true
+                // sort: true
             }];
 
             const options = {
@@ -123,20 +127,32 @@
             }
 
             // const myTable = new Table(table, headers, data, options);
+            const myTable = new Table(table, headers, data, {
+                datatable: {
+                    autofill: true
+                },
+                classes: [
+                    'table',
+                    'table-striped',
+                    'table-hover',
+                    'table-bordered',
+                    // 'table-dark'
+                ]
+            });
 
-            const csv = `id,firstname,lastname,email,email2,profession
-                100,Mallory,Seligman,Mallory.Seligman@yopmail.com,Mallory.Seligman@gmail.com,doctor
-                101,Corene,Toor,Corene.Toor@yopmail.com,Corene.Toor@gmail.com,firefighter
-                102,Orelia,Rillings,Orelia.Rillings@yopmail.com,Orelia.Rillings@gmail.com,doctor
-                103,Cherilyn,Koziara,Cherilyn.Koziara@yopmail.com,Cherilyn.Koziara@gmail.com,developer
-                104,Ada,Radu,Ada.Radu@yopmail.com,Ada.Radu@gmail.com,doctor
-                105,Nannie,Uund,Nannie.Uund@yopmail.com,Nannie.Uund@gmail.com,firefighter
-                106,Queenie,Sancho,Queenie.Sancho@yopmail.com,Queenie.Sancho@gmail.com,police officer
-                107,Robbi,Neils,Robbi.Neils@yopmail.com,Robbi.Neils@gmail.com,doctor
-                108,Hollie,O'Neill,Hollie.O'Neill@yopmail.com,Hollie.O'Neill@gmail.com,police officer
-                109,Corina,Yerkovich,Corina.Yerkovich@yopmail.com,Corina.Yerkovich@gmail.com,developer`;
+            // const csv = `id,firstname,lastname,email,email2,profession
+            //     100,Mallory,Seligman,Mallory.Seligman@yopmail.com,Mallory.Seligman@gmail.com,doctor
+            //     101,Corene,Toor,Corene.Toor@yopmail.com,Corene.Toor@gmail.com,firefighter
+            //     102,Orelia,Rillings,Orelia.Rillings@yopmail.com,Orelia.Rillings@gmail.com,doctor
+            //     103,Cherilyn,Koziara,Cherilyn.Koziara@yopmail.com,Cherilyn.Koziara@gmail.com,developer
+            //     104,Ada,Radu,Ada.Radu@yopmail.com,Ada.Radu@gmail.com,doctor
+            //     105,Nannie,Uund,Nannie.Uund@yopmail.com,Nannie.Uund@gmail.com,firefighter
+            //     106,Queenie,Sancho,Queenie.Sancho@yopmail.com,Queenie.Sancho@gmail.com,police officer
+            //     107,Robbi,Neils,Robbi.Neils@yopmail.com,Robbi.Neils@gmail.com,doctor
+            //     108,Hollie,O'Neill,Hollie.O'Neill@yopmail.com,Hollie.O'Neill@gmail.com,police officer
+            //     109,Corina,Yerkovich,Corina.Yerkovich@yopmail.com,Corina.Yerkovich@gmail.com,developer`;
 
-            const myTable = Table.from(table, csv, options);
+            // const myTable = Table.from(table, csv, options);
         </script>
     </main>
     <footer>
