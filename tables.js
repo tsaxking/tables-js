@@ -1378,6 +1378,7 @@ class Table {
             }
         }
 
+        type = type.toLowerCase();
 
         switch (type) {
             case 'json':
@@ -1389,7 +1390,7 @@ class Table {
             case 'tsv':
                 return Table.fromTSV(table, data, options);
             default:
-                throw new Error('Invalid type');
+                throw new Error('Invalid type, allowed types are: json, html, csv, and tsv. received: ' + type);
         }
     }
 

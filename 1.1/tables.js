@@ -280,7 +280,7 @@ class Table_StateStack {
  * @class
  * @classdesc A class for creating a table
  * 
- * @version 1.1
+ * @since 1.1.0
  * 
  * @example
  * const table = new Table('table', [], [], {});
@@ -839,9 +839,7 @@ class Table {
 
         // JQuery DataTables
         if (this.options.dataTable || this.options.datatable) {
-            const datatableOptions = typeof this.options.dataTable == 'object' ? this.options.dataTable : typeof this.options.datatable == 'object' ? this.options.datatable : null;
-
-            $(this.el).DataTable(datatableOptions);
+            $(this.el).DataTable(this.options.dataTable || this.options.datatable);
         }
     }
 
@@ -1380,6 +1378,7 @@ class Table {
             }
         }
 
+        type = type.toLowerCase();
 
         switch (type) {
             case 'json':
@@ -1391,7 +1390,7 @@ class Table {
             case 'tsv':
                 return Table.fromTSV(table, data, options);
             default:
-                throw new Error('Invalid type');
+                throw new Error('Invalid type, allowed types are: json, html, csv, and tsv. received: ' + type);
         }
     }
 
