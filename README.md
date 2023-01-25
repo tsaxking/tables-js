@@ -275,9 +275,9 @@ All the properties below are written as `header.property`. These properties are 
 
 #### Changing the `<td>` Elements
 ##### Classes
-`header.classes` is an array of strings that will be added to the `<td>` element.
-`header.tdClasses` is an array of strings that will be added to each `<td>` element in this column.
-`header.tdClassTests` is an array of objects that will be used to add classes to the `<td>` element. Each object must have the following properties:
+`header.th.classes` is an array of strings that will be added to the `<th>` element.
+`header.td.classes` is an array of strings that will be added to each `<td>` element in this column.
+`header.td.classTests` is an array of objects that will be used to add classes to the `<td>` element. Each object must have the following properties:
 - `test` is a function that returns a boolean. If the function returns true, the class will be added to the `<td>` element.
 - `class` (OPTIONAL) is a string that will be added to the `<td>` element if the `test` function returns true.
 - `classes` (OPTIONAL) is an array of strings that will be added to the `<td>` element if the `test` function returns true.
@@ -286,40 +286,53 @@ Example:
 ```javascript
 const headers = [{
     title: 'Name',
-    classes: ['my-class', 'my-other-class'], // applies to <th>
-    tdClasses: ['my-td-class', 'my-other'], // applies to <td>
-    tdClassTests: [{
-        test: (row) => {
-            return row.name === 'John';
-        },
-        class: 'my-class' // applies to <td>
-    }, {
-        test: (row) => {
-            return row.name === 'John';
-        },
-        classes: ['my-class', 'my-other-class'] // applies to <td>
-    }]
+    th: {
+        classes: ['my-class', 'my-other-class'] // applies to <th>
+    },
+    td: {
+        classes: ['my-td-class', 'my-other'], // applies to <td>
+        classTests: [{
+            test: (row) => {
+                return row.name === 'John';
+            },
+            class: 'my-class' // applies to <td>
+        }, {
+            test: (row) => {
+                return row.name === 'John';
+            },
+            classes: ['my-class', 'my-other-class'] // applies to <td>
+        }]
+    }
 }];
 ```
 
 ##### Attributes
-`header.attributes` is an array of objects that will be added to the `<td>` element. Each object must have the following properties:
+`header.td.attributes` is an array of objects that will be added to the `<td>` element. Each object must have the following properties:
 - `name` is a string that will be the name of the attribute.
 - `value` is a either a string that is the value of the attribute, or a function that returns a string that is the value of the attribute that passes in the row as a parameter.
+`header.th.attributes` is an array of objects that will be added to the `<th>` element. `header.th.attrubutes[].value` can only be a string, not a function.
 
 Example:
 ```javascript
 const headers = [{
     title: 'Name',
-    attributes: [{
-        name: 'data-name',
-        value: 'John'
-    }, {
-        name: 'data-name',
-        value: (row) => { // row is a TableRow object
-            return row.name;
-        }
-    }]
+    td: {
+        attributes: [{
+            name: 'data-name',
+            value: 'John'
+        }, {
+            name: 'data-name',
+            value: (row) => { // row is a TableRow object
+                return row.name;
+            }
+        }]
+    },
+    td: {
+        attributes: [{
+            name: 'data-name',
+            value: 'John'
+        }]
+    }
 }];
 ```
 
@@ -329,33 +342,37 @@ All lisener arrays are structured the same way. Each object must have the follow
 - `callback` (v1.1.x) is a function that is the listener that passes in the event as a parameter. (Uses a different data structure than v1.0.x)
 - `action` (v1.0.x) is a function that is the listener that passes in the event as a parameter.
 
-`header.thListeners` is an array of objects that will be added to the `<th>` element.
-`header.tdListeners` is an array of objects that will be added to each `<td>` element in this column.
+`header.th.listeners` is an array of objects that will be added to the `<th>` element.
+`header.td.listeners` is an array of objects that will be added to each `<td>` element in this column.
 
 Example:
 ```javascript
 const headers = [{
     title: 'Name',
-    thListeners: [{
-        event: 'click', // runs when the `<th>` is clicked
-        callback: (event) => { // v1.1.x
-            /* 
-                event is an event object with the following expanded property:
-                - event.__row = TableRow object
-            */
-            console.log(event);
-        }
-    }],
-    tdListeners: [{
-        event: 'click',
-        action: ({
-            event, // event object
-            row, // data row (custom data)
-            tableRow // TableRow object
-        }) => { // v1.0.x
-            console.log(event);
-        }
-    }]
+    th: { 
+        listeners: [{
+            event: 'click', // runs when the `<th>` is clicked
+            callback: (event) => { // v1.1.x
+                /* 
+                    event is an event object with the following expanded property:
+                    - event.__row = TableRow object
+                */
+                console.log(event);
+            }
+        }]
+    },
+    td: {
+        listeners: [{
+            event: 'click',
+            action: ({
+                event, // event object
+                row, // data row (custom data)
+                tableRow // TableRow object
+            }) => { // v1.0.x
+                console.log(event);
+            }
+        }]
+    }
 }];
 ```
 
@@ -385,7 +402,8 @@ const headers = [{
 }];
 
 const data = [{
-    Name: 'John'
+    Name: 'John',
+    Age: 34
 }];
 
 const options = {
@@ -408,7 +426,7 @@ Will create
             <td contenteditable="true">John</td>
         </tr>
         <tr>
-            <td>John</td>
+            <td>34</td>
         </tr>
     </tbody>
 </table>
@@ -456,33 +474,125 @@ Will create
 </table>
 ```
 
-## Data
+### Data
 The header array is used to represent each row in the table. This is fully customizable because nothing from the `Table` class reads this data, only your `getData` does and other custom functions.
 
 Each row's data will be in `TableRow.data`.
 
-## Options
-### `<tr>` Event Listeners
-`options.trListeners` is the same as `header.thListeners` and `header.tdListeners` except it applies to all `<tr>` elements.
-### Attributes
-`options.attributes` is the same as `header.attributes` except it applies to all `<tr>` elements.
-### Classes
-`options.classes` is the same as `header.classes` except it applies to all `<tr>` elements.
-`options.classTests` is the same as `header.classTests` except it applies to all `<tr>` elements.
-### Jquery DataTable
+### Options
+#### `<tr>` Event Listeners
+`options.tr.listeners` is the same as `header.th.listeners` and `header.td.listeners` except it applies to all `<tr>` elements.
+#### Attributes
+`options.tr.attributes` is the same as `header.th.attributes` except it applies to all `<tr>` elements.
+#### Classes
+`options.tr.classes` is the same as `header.th.classes` except it applies to all `<tr>` elements.
+`options.tr.classTests` is the same as `header.td.classTests` except it applies to all `<tr>` elements.
+#### Jquery DataTable
 `options.datatable = true` or `options.dataTable = true` will create a Jquery DataTable. This will override all other options except `options.editable`.
-### Header Sorting
+#### Header Sorting
 `header.sortable` will make every `<th>` element sortable. This will not override `header.sort`. The sort function will be the same as the default header sort function (`(a, b) => a.el.innerText.localCompare(b.el.innerText);`).
-### Even Columns
+#### Even Columns
 `options.evenColumns = true` will set the width to be the same for every column using percentages.
-### Minimize
+#### Minimize
 `minimize.open` is the icon that will be used for the minimize button. The default is `<i class="material-icons">chevron_left</i>`.
 `minimize.minimized` is a boolean that determines if the table is minimized. The default is `false`.
+#### Caption
+`options.caption` is a caption you can add onto the table. This will be added to the `<table>` element.
+
+Example:
+```javascript
+const options = {
+    caption: 'This is a caption'
+}
+
+// or
+
+const options = {
+    caption: {
+        content: 'This is a caption',
+        attributes: [], // Attributes onto the <caption> element
+        classes: [], // Classes onto the <caption> element
+        listeners: [] // Event listeners onto the <caption> element
+    }
+}
+
+```
+Will create
+```html
+<table>
+    <caption>This is a caption</caption>
+    <thead>
+        <!-- Your headers -->
+    </thead>
+    <tbody>
+        <!-- Your rows -->
+    </tbody>
+</table>
+```
 
 ### Options soon to be implemented
 - Reorder: Drag and drop to reorder rows and columns. Currently working on this, you can try it out by setting `options.reorder = true` to see what is happening. If you have tips please let me know.
 - Search: Search through the table using fuzzy search
 - Pagination: Different pagination options for the table (ex. using dots, arrows, select, etc.)
-- Caption: Add a caption to the table
 - Insertion: Insert a row or column
 - Deletion: Delete a row or column
+
+
+
+
+
+# Version 1.0.x
+***Note: This version is deprecated and will not be updated. Please use version 1.1.x.***
+The basics are the same, but the options and headers parameters are different.
+
+## Headers
+```javascript
+const headers = [{
+    title: 'Name',
+    getData: (row) => row.name,
+    listeners: [{ // applied only to <td> elements
+        event: 'click',
+        callback: (e) => {
+            console.log(e);
+        }
+    }],
+    classes: ['class1', 'class2'], // applied only to <th> elements
+    tdClassTests: [{ // applied only to <td> elements
+        test: (row) => row.name === 'John',
+        classes: ['class1', 'class2']
+    }],
+    tdClasses: ['class1', 'class2'], // applied only to <td> elements
+    tdAttributes: [{ // applied only to <td> elements
+        name: 'contenteditable',
+        value: 'true' // can be string
+        value: (row) => row.name === 'John' ? 'true' : 'false' // or function
+    }]
+}]
+```
+## Options
+```javascript
+const options = {
+    evenColumns: true,
+    trAttributes: [{
+        name: 'contenteditable',
+        value: 'true' // can be string
+        value: (row) => row.name === 'John' ? 'true' : 'false' // or function
+    }],
+    appendTest: (row) => row.name === 'John',
+    trClasses: ['class1', 'class2'],
+    trClassTests: [{
+        test: (row) => row.name === 'John',
+        classes: ['class1', 'class2']
+    }],
+    trListeners: [{
+        event: 'click',
+        callback: (e) => {
+            console.log(e);
+        }
+    }]
+}
+```
+## Example
+```javascript
+setTable(document.getElementById('my-table'), headers, data, options);
+```

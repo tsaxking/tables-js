@@ -1,3 +1,10 @@
+/**
+ * Parses a string (csv, tsv, etc.) into an object
+ * @param {String} str String to parse into object 
+ * @param {String} delimeter Delimeter to split the rows by
+ * @param {String} escape Escape character to escape delimeters 
+ * @returns {Object[]} Array of objects
+ */
 const parseSV = (str, delimeter, escape) => {
     // return [{a: 1, b: 2}, {a: 3, b: 4}]
     // include " in the string to escape it
@@ -287,7 +294,7 @@ class Table_StateStack {
  */
 class Table {
     /**
-     * @param {HTMLElement} table The table element
+     * @param {HTMLElement | String} table The table element or css selector for the table
      * 
      * 
      * 
@@ -300,20 +307,26 @@ class Table {
      * @param {Function} headers[].getData A function that returns the data for the td element (takes in the row data)
      * @param {Function} headers[].sort A function that returns the data for the column (takes in (TableRow, TableRow))
      * @param {Boolean} headers[].minimize Whether or not to add minimize functionality to the header
-     * @param {String[]} headers[].classes An array of classes to add to the td elements
-     * @param {String[]} headers[].tdClasses An array of classes to add to the th elements
-     * @param {Object[]} headers[].classTests An array of objects with class tests for the td elements
-     * @param {String} headers[].classTests[].class The class to add to the td element
-     * @param {String[]} headers[].classTests[].classes The class to add to the td element
-     * @param {Function} headers[].classTests[].test A function that returns a boolean for whether or not to add the class to the td element (takes in the row data)
+     * @param {Object} headers.th An object with properties for the th element
+     * @param {String[]} headers[].th.classes An array of classes to add to the td elements
      * 
+     * @param {Object} headers[].td An object with properties for the td elements
+     * @param {String[]} headers[].td.lasses An array of classes to add to the th elements
+     * @param {Object[]} headers[].td.classTests An array of objects with class tests for the td elements
+     * @param {String} headers[].td.classTests[].class The class to add to the td element
+     * @param {String[]} headers[].td.classTests[].classes The class to add to the td element
+     * @param {Function} headers[].td.classTests[].test A function that returns a boolean for whether or not to add the class to the td element (takes in the row data)
+     * @todo Divide td and th into separate objects within the headers array
      * 
-     * @param {Object[]} headers[].listeners An array of objects with event listeners for the th elements
-     * @param {String} headers[].listeners[].listener The event listener type
-     * @param {Function} headers[].listeners[].callback The callback function for the event listener (uses 1.1.0+ data structure)
-     * @param {Function} headers[].listeners[].action The action function for the event listener (takes in the 1.0.0 data structure)
+     * @param {Object[]} headers[].th.listeners An array of objects with event listeners for the th elements
+     * @param {String} headers[].th.listeners[].listener The event listener type
+     * @param {Function} headers[].th.listeners[].callback The callback function for the event listener (uses 1.1.0+ data structure)
+     * @param {Function} headers[].th.listeners[].action The action function for the event listener (takes in the 1.0.0 data structure)
      * 
-     * 
+     * @param {Object[]} headers[].td.listeners An array of objects with event listeners for the td elements
+     * @param {String} headers[].td.listeners[].listener The event listener type
+     * @param {Function} headers[].td.listeners[].callback The callback function for the event listener (uses 1.1.0+ data structure)
+     * @param {Function} headers[].td.listeners[].action The action function for the event listener (takes in the 1.0.0 data structure)
      * 
      * @param {Any[]} data The data for the table
      * 
@@ -324,14 +337,15 @@ class Table {
      * 
      * @param {Function} options.appendTest A function that returns a boolean for whether or not to append a row, takes in the row data
      *
-     * @param {Object[]} options.trListeners An array of objects with event listeners for the table rows
-     * @param {String} options.trListeners[].listener The event listener type
-     * @param {Function} options.trListeners[].callback The callback function for the event listener (uses 1.1.0+ data structure)
-     * @param {Function} options.trListeners[].action The action function for the event listener (takes in the 1.0.0 data structure)
+     * @param {Object} options.tr The options for the tr elements
+     * @param {Object[]} options.tr.isteners An array of objects with event listeners for the table rows
+     * @param {String} options.tr.listeners[].listener The event listener type
+     * @param {Function} options.tr.listeners[].callback The callback function for the event listener (uses 1.1.0+ data structure)
+     * @param {Function} options.tr.listeners[].action The action function for the event listener (takes in the 1.0.0 data structure)
      * 
-     * @param {Object[]} options.trAttributes An array of objects with attributes for the table rows
-     * @param {String} options.trAttributes[].attribute The attribute name
-     * @param {String | Function} options.trAttributes[].value The attribute value or a function that returns the attribute value (takes in the row data)
+     * @param {Object[]} options.tr.attributes An array of objects with attributes for the table rows
+     * @param {String} options.tr.attributes[].attribute The attribute name
+     * @param {String | Function} options.tr.attributes[].value The attribute value or a function that returns the attribute value (takes in the row data)
      * 
      * 
      * @param {String[]} options.trClasses An array of classes to add to the table rows
@@ -342,18 +356,18 @@ class Table {
      * @param {String} options.colGroup[].classes The classes of the colGroup
      * 
      * 
-     * @param {Object[]} options.trClassTests An array of objects with tests for the table rows
-     * @param {String} options.trClassTests[].class The class to add to the row
-     * @param {String[]} options.trClassTests[].classes The classes to add to the row
-     * @param {Function} options.trClassTests[].test A function that returns a boolean for whether or not to add the class to the row (takes in the row data)
+     * @param {Object[]} options.tr.classTests An array of objects with tests for the table rows
+     * @param {String} options.tr.classTests[].class The class to add to the row
+     * @param {String[]} options.tr.classTests[].classes The classes to add to the row
+     * @param {Function} options.tr.classTests[].test A function that returns a boolean for whether or not to add the class to the row (takes in the row data)
      * 
      * 
      * @param {Boolean} options.fixedHeaders Whether or not to use style.position = 'sticky' for the headers
      * @param {String[]} options.classes An array of classes to add to the table element
      * 
      * 
-     * @param {Object} options.dataTable Options for the DataTables library (use with JQuery and DataTables) 
-     * @param {Object} options.datatable Options for the DataTables library (use with JQuery and DataTables)
+     * @param {Object} options.dataTable Options for the DataTables library (use with JQuery and DataTables) Or just set it to true to use the default options
+     * @param {Object} options.datatable Options for the DataTables library (use with JQuery and DataTables) Or just set it to true to use the default options
      * 
      * 
      * @param {Object} options.reorder Under Construction: Options for the drag/drop reorder functionality
@@ -434,7 +448,7 @@ class Table {
     constructor(table, headers, data, options) {
         if (typeof table === 'string') table = document.querySelector(table);
 
-        if (!table.querySelector) {
+        if (!table || !table.querySelector) {
             throw new Error('Table must be an HTML element');
         }
 
@@ -544,7 +558,7 @@ class Table {
             this.destroy(true);
         }
 
-        this.stack.onReject = () => {}
+        this.stack.onReject = () => {};
 
         if (this.options.__render !== false) this.stack.addState(this);
     }
@@ -579,7 +593,8 @@ class Table {
     render() {
         const {
             evenColumns,
-            reorder
+            reorder,
+            caption
         } = this.options;
         this.destroy();
 
@@ -765,43 +780,45 @@ class Table {
                     i.innerText = 'drag_indicator';
                     return i;
                 },
-                listeners: [{
-                    event: 'mousedown',
-                    action: dragStart,
-                    callback: listeners.onDragStart ? listeners.onDragStart : () => {}
-                }, {
-                    event: 'touchstart',
-                    action: dragStart,
-                    callback: listeners.onDragStart ? listeners.onDragStart : () => {}
-                }, {
-                    event: 'mousemove',
-                    action: dragging,
-                    callback: listeners.onDrag ? listeners.onDrag : () => {}
-                }, {
-                    event: 'touchmove',
-                    action: dragging,
-                    callback: listeners.onDrag ? listeners.onDrag : () => {}
-                }, {
-                    event: 'mouseup',
-                    action: dragEnd,
-                    callback: listeners.onDragEnd ? listeners.onDragEnd : () => {}
-                }, {
-                    event: 'touchend',
-                    action: dragEnd,
-                    callback: listeners.onDragEnd ? listeners.onDragEnd : () => {}
-                }, {
-                    event: 'mouseleave',
-                    action: dragEnd,
-                    callback: listeners.onDragEnd ? listeners.onDragEnd : () => {}
-                }, {
-                    event: 'touchcancel',
-                    action: dragEnd,
-                    callback: listeners.onDragEnd ? listeners.onDragEnd : () => {}
-                }],
-                attributes: [{
-                    attribute: 'style',
-                    value: 'cursor: grab; user-select: none;'
-                }]
+                td: {
+                    listeners: [{
+                        event: 'mousedown',
+                        action: dragStart,
+                        callback: listeners.onDragStart ? listeners.onDragStart : () => {}
+                    }, {
+                        event: 'touchstart',
+                        action: dragStart,
+                        callback: listeners.onDragStart ? listeners.onDragStart : () => {}
+                    }, {
+                        event: 'mousemove',
+                        action: dragging,
+                        callback: listeners.onDrag ? listeners.onDrag : () => {}
+                    }, {
+                        event: 'touchmove',
+                        action: dragging,
+                        callback: listeners.onDrag ? listeners.onDrag : () => {}
+                    }, {
+                        event: 'mouseup',
+                        action: dragEnd,
+                        callback: listeners.onDragEnd ? listeners.onDragEnd : () => {}
+                    }, {
+                        event: 'touchend',
+                        action: dragEnd,
+                        callback: listeners.onDragEnd ? listeners.onDragEnd : () => {}
+                    }, {
+                        event: 'mouseleave',
+                        action: dragEnd,
+                        callback: listeners.onDragEnd ? listeners.onDragEnd : () => {}
+                    }, {
+                        event: 'touchcancel',
+                        action: dragEnd,
+                        callback: listeners.onDragEnd ? listeners.onDragEnd : () => {}
+                    }],
+                    attributes: [{
+                        attribute: 'style',
+                        value: 'cursor: grab; user-select: none;'
+                    }]
+                }
             });
 
             this.headers = this.headers.filter((h, i) => this.headers.findIndex(h2 => h2.title === h.title) === i);
@@ -826,6 +843,40 @@ class Table {
 
         this.renderHeaders();
         this.renderRows();
+
+        if (caption) {
+
+            if (typeof caption == 'object') {
+
+                const {
+                    content,
+                    attributes,
+                    listeners,
+                    classes
+                } = caption;
+
+                const captionEl = document.createElement('caption');
+                if (typeof content == string) captionEl.innerText = content;
+                else captionEl.appendChild(content);
+
+                if (attributes) attributes.forEach(attr => {
+                    captionEl.setAttribute(attr.attribute, attr.value);
+                });
+
+                if (listeners) listeners.forEach(listener => {
+                    captionEl.addEventListener(listener.event, listener.action);
+                });
+
+                if (classes) captionEl.classList.add(...classes);
+
+                // append at top
+                this.el.insertBefore(captionEl, this.el.firstChild);
+            } else {
+                const captionEl = document.createElement('caption');
+                captionEl.innerText = caption;
+                this.el.insertBefore(captionEl, this.el.firstChild);
+            }
+        }
 
         // makes all columns the same width
         if (evenColumns) {
@@ -924,7 +975,21 @@ class Table {
             if (!h) return;
             const th = new TableHeader(h.title);
 
-            if (h.minimize) {
+            const {
+                minimize,
+                sort,
+                th: _thInfo
+            } = h;
+
+            let thClasses,
+                thAttributes;
+
+            if (_thInfo) {
+                thClasses = _thInfo.classes;
+                thAttributes = _thInfo.attributes;
+            }
+
+            if (minimize) {
                 const i = document.createElement('i');
                 i.classList.add('material-icons');
                 if (h.__minimized) {
@@ -964,10 +1029,10 @@ class Table {
                     this.render();
                 });
 
-                th.el.classList.add('ws-nowrap');
+                th.el.style.whiteSpace = 'nowrap';
             }
 
-            if (h.sort) {
+            if (sort) {
                 th.el.style.cursor = 'pointer';
                 th.el.addEventListener('click', () => {
                     let { __reverse } = h;
@@ -984,6 +1049,14 @@ class Table {
 
                     this.data = this.sort(h.sort, __reverse, i);
                     this.render();
+                });
+            }
+
+            if (Array.isArray(thClasses)) th.el.classList.add(...thClasses);
+
+            if (Array.isArray(thAttributes)) {
+                thAttributes.forEach(attr => {
+                    th.el.setAttribute(attr.attribute, attr.value);
                 });
             }
 
@@ -1021,16 +1094,35 @@ class Table {
         const tbody = document.createElement('tbody');
 
         const {
-            trListeners,
+            tr: trInfo,
             appendTest,
-            trAttributes,
-            trClassTests,
-            trClasses,
             colGroup,
             editable
         } = this.options;
 
         let tdTooltip = false;
+
+        let attributes,
+            classes,
+            classTests,
+            listeners;
+
+        if (trInfo) {
+            attributes = trInfo.attributes;
+
+            if (attributes && !Array.isArray(attributes)) {
+                attributes = Object.entries(attributes).map(([attribute, value]) => {
+                    return {
+                        attribute,
+                        value
+                    }
+                });
+            }
+
+            classes = trInfo.classes;
+            classTests = trInfo.classTests;
+            listeners = trInfo.listeners;
+        }
 
         let i = -1,
             fullSpanPos = 0;
@@ -1063,10 +1155,38 @@ class Table {
                     editable
                 });
 
+                const {
+                    td
+                } = h;
+
+                let listeners,
+                    attributes,
+                    classes,
+                    classTests,
+                    tooltip;
+
+                if (td) {
+                    listeners = td.listeners;
+                    attributes = td.attributes;
+
+                    if (attributes && !Array.isArray(attributes)) {
+                        attributes = Object.entries(attributes).map(([attribute, value]) => {
+                            return {
+                                attribute,
+                                value
+                            }
+                        });
+                    }
+
+                    classes = td.classes;
+                    classTests = td.classTests;
+                    tooltip = td.tooltip;
+                }
+
                 this.columns[j].cells.push(c);
 
-                if (Array.isArray(h.listeners)) {
-                    h.listeners.forEach(l => {
+                if (Array.isArray(listeners)) {
+                    listeners.forEach(l => {
                         c.el.addEventListener(l.event, (e) => {
                             if (l.action) {
                                 l.action({
@@ -1091,26 +1211,22 @@ class Table {
                     });
                 }
 
-                if (Array.isArray(h.attributes)) {
-                    h.attributes.forEach(a => {
+                if (Array.isArray(attributes)) {
+                    attributes.forEach(a => {
                         c.el.setAttribute(a.name || a.attribute, typeof a.value === 'function' ? a.value(row) : a.value);
                     });
                 }
 
-                if (Array.isArray(h.classTests)) {
-                    h.classTests.forEach(t => {
+                if (Array.isArray(classTests)) {
+                    classTests.forEach(t => {
                         if (t.test(row)) c.el.classList.add(
                             ...(Array.isArray(t.classes) ? t.classes : [t.value])
                         );
                     });
                 }
 
-                if (Array.isArray(h.classes)) {
-                    c.el.classList.add(...h.classes);
-                }
-
-                if (Array.isArray(h.tdClasses)) {
-                    c.el.classList.add(...h.tdClasses);
+                if (Array.isArray(classes)) {
+                    c.el.classList.add(...classes);
                 }
 
                 if (Array.isArray(colGroup)) {
@@ -1132,8 +1248,8 @@ class Table {
                 }
 
                 try {
-                    if (h.tdTooltip) {
-                        const tooltip = tdTooltip(row, h.title || h.name || h.key)
+                    if (tooltip) {
+                        const tooltip = tooltip(row, h.title || h.name || h.key);
                         if (tooltip) {
                             c.el.title = tooltip;
                             tdTooltip = true;
@@ -1148,8 +1264,8 @@ class Table {
             r.data = row;
             r.index = i;
 
-            if (Array.isArray(trListeners)) {
-                trListeners.forEach(l => {
+            if (Array.isArray(listeners)) {
+                listeners.forEach(l => {
                     r.el.addEventListener(l.event || l.type, (e) => {
                         if (l.action) {
                             l.action({
@@ -1171,22 +1287,22 @@ class Table {
                 });
             }
 
-            if (Array.isArray(trAttributes)) {
-                trAttributes.forEach(a => {
+            if (Array.isArray(attributes)) {
+                attributes.forEach(a => {
                     r.el.setAttribute(a.name || a.attribute, typeof a.value === 'function' ? a.value(row) : a.value);
                 });
             }
 
-            if (Array.isArray(trClassTests)) {
-                trClassTests.forEach(t => {
-                    if (t.test(row)) tr.classList.add(
+            if (Array.isArray(classTests)) {
+                classTests.forEach(t => {
+                    if (t.test(row)) trInfo.classList.add(
                         ...(Array.isArray(t.classes) ? t.classes : [t.class || t.value])
                     );
                 });
             }
 
-            if (Array.isArray(trClasses)) {
-                r.el.classList.add(...trClasses);
+            if (Array.isArray(classes)) {
+                r.el.classList.add(...classes);
             }
 
             tbody.appendChild(r.el);
@@ -1831,60 +1947,4 @@ class TableFooter extends TableHeader {
     constructor(...args) {
         super(...args);
     }
-}
-
-
-
-
-
-
-/**
- * @description Creates a table from an element, headers, and data. You can add in event listeners if you like! Fully customizable
- * @param {Element} table Table Element
- * @param {Array} headers Header: {title: 'String', getData: (rowData) => {how to get content to place into <td></td>}, listeners: (OPTIONAL) [{type: 'listener type', action: (rowData) => {what to do on listener}}]
- * @param {Array} data Each item is a row, structure it how you like. getData(data[n]) and action(data[n]) use this
- * @param {Object} options (optional) see below
- * 
- * @returns {Table} Table Object
- * 
- * @version 1.0.0
- * 
- * @example
- *  ```javascript
- *  const tableOptions = {
- *      appendTest: (row) => {}, // function: must return a boolean, if true, will append the tr to the table. Parameter is the row
- *      trListeners: [], // array of objects: {type: 'listener type', action: ({ row, tr, event }) => { // what to do on listener}}
- *      trAttributes: [], // array of objects: {type: 'attribute type', value: (row) => { function to get attribute }}
- *      dataTable: false, // boolean: if true, will create a data table using jquery dataTable, this requires the table to have an id
- *      colGroup: [], // array of objects: { index: 0, classes: ['class'] }
- *      trClassTests: [], // array of objects: { test: (row) => { function to test row }, value: 'class' }
- *      evenColumns: false, // boolean: if true, will make all columns the same width
- *      trClasses: [], // array of strings: ['class1', 'class2']
- *      onEdit: (row, column, newValue) => {} // function: what to do when a row is edited, this will make the table a spreadsheet. DO NOT USE WITH ANY OTHER OPTION
- *  }
- *  ```
- */
-function setTable(table, headers, data, options) {
-    return new Table(table, headers, data, options);
-}
-
-function getTableElements(table) {
-    if (!table.querySelector) throw new Error('Table must be a node!');
-
-    let rows = [];
-
-    let thead = table.querySelector('thead');
-
-    table.querySelectorAll('tbody tr').forEach(tr => {
-        rows.push(tr);
-    });
-
-    let tfoot = table.querySelector('tfoot');
-
-    return new Table({
-        rows,
-        thead,
-        table,
-        tfoot
-    });
 }

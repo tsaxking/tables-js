@@ -5,8 +5,6 @@
  * @param {Array} data Each item is a row, structure it how you like. getData(data[n]) and action(data[n]) use this
  * @param {Object} options (optional) see below
  * 
- * @returns {Table} Table Object
- * 
  * @example
  *  ```javascript
  *  const tableOptions = {
@@ -21,6 +19,8 @@
  *      onEdit: (row, column, newValue) => {} // function: what to do when a row is edited, this will make the table a spreadsheet. DO NOT USE WITH ANY OTHER OPTION
  *  }
  *  ```
+ * 
+ * @deprecated
  */
 function setTable(table, headers, data, options) {
     let appendTest = null,
