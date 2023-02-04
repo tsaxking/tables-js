@@ -288,8 +288,6 @@ function setTable(table, headers, data, options) {
         $('#' + table.id + ' td').tooltip();
     }
 
-    let renderedTable = getTableElements(table);
-
     // make reordered table
     if (reorder) {
         const dragIndex = headers.indexOf(headers.find(h => h.title == 'Drag'));
@@ -586,8 +584,6 @@ function setTable(table, headers, data, options) {
         });
 
     }
-
-    return renderedTable;
 }
 
 
