@@ -1899,7 +1899,7 @@ Leaving the cell will cancel the changes
 
 /**
  *  A table header
- * @priavte
+ * @private
  */
 class TableHeader {
     /**

@@ -303,6 +303,7 @@ class Table {
      * @param {String} headers[].title The title of the header
      * @param {String} headers[].name The name of the header (used the same as title)
      * @param {String} headers[].key The key of the header (used the same as name)
+     * @param {Boolean} headers[].frozen Whether or not the column is frozen (prevents it from scrolling horizontally)
      * 
      * @param {Function} headers[].getData A function that returns the data for the td element (takes in the row data)
      * @param {Function} headers[].sort A function that returns the data for the column (takes in (TableRow, TableRow))
@@ -978,8 +979,17 @@ class Table {
             const {
                 minimize,
                 sort,
-                th: _thInfo
+                th: _thInfo,
+                frozen
             } = h;
+
+            if (frozen) {
+                if (i !== 0) console.warn('Frozen columns must be the first column in the table. Ignoring frozen column.');
+                // freeze the column
+                th.el.style.position = 'sticky';
+                th.el.style.left = '0';
+                th.el.style.zIndex = '1';
+            }
 
             let thClasses,
                 thAttributes;
@@ -1156,8 +1166,16 @@ class Table {
                 });
 
                 const {
-                    td
+                    td,
+                    frozen
                 } = h;
+
+                if (frozen) {
+                    if (j !== 0) console.warn('Frozen columns must be the first column in the table');
+                    c.el.style.position = 'sticky';
+                    c.el.style.zIndex = 1;
+                    c.el.style.left = 0;
+                }
 
                 let listeners,
                     attributes,
@@ -1722,13 +1740,15 @@ class TableCell {
         rowPos,
         colPos,
         minimized,
-        editable
+        editable,
+        frozen
     }) {
         this.content = header.getData ? header.getData(row) : row[header.title || header.name || header.key];
         this.type = type;
         this.colPos = colPos;
         this.rowPos = rowPos;
         this.headerTitle = header.title;
+        this.frozen = frozen;
         this.header = header;
         this.editable = editable;
         this.onChange = editable ? editable.onChange : () => {};
@@ -1765,7 +1785,6 @@ class TableCell {
         this.el.dataset.colPos = this.colPos;
         this.el.dataset.rowPos = this.rowPos;
         this.el.dataset.header = this.headerTitle;
-
 
         if (this.content.querySelector) {
             if (this.editable) throw new Error('Editable cells cannot contain HTML elements');
@@ -1899,7 +1918,7 @@ Leaving the cell will cancel the changes
 
 /**
  *  A table header
- * @priavte
+ * @private
  */
 class TableHeader {
     /**

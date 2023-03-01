@@ -586,7 +586,6 @@ function setTable(table, headers, data, options) {
     }
 }
 
-
 function placeHolderDrop(e, table, tr) {
     e.preventDefault();
     const { insert } = tr.dataset;
