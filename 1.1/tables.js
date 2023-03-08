@@ -106,10 +106,9 @@ class RenderedTable {
     }
 
     invert() {
-        console.log('inverting...');
+        // console.log('inverting...');
         // switch x and y axis
         const rows = new Array(this.rows[0].cells.length).fill(null).map(() => []);
-        const columns = new Array(this.rows.length).fill(null);
 
         const ths = Array.from(this.table.querySelectorAll('thead th')).map((th, i) => {
             if (th.children.length) {
@@ -127,7 +126,6 @@ class RenderedTable {
                         th.appendChild(ths[j]);
                     }
                     rows[j].push(th);
-                    return;
                 }
 
                 const td = document.createElement('td');
