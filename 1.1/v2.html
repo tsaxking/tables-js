@@ -52,7 +52,7 @@
                     'indigo',
                     'violet'
                 ][Math.floor(Math.random() * 7)],
-                date: new Date(Date.now() - Math.floor(Math.random() * 10000000000)),
+                date: Date.now() - Math.floor(Math.random() * 10000000000),
                 bool: Math.random() > 0.5,
                 bool2: Math.random() > 0.5,
                 long: new Array(100).fill('AA').map((_, i) => i).join(', ')
@@ -95,15 +95,20 @@
                 title: 'Bool2',
                 getData: (row) => row.bool2,
                 // sort: true
+                // }, {
+                //     title: 'Long',
+                //     getData: (row) => {
+                //             const div = document.createElement('div');
+                //             div.innerHTML = row.long;
+                //             div.style.whiteSpace = 'nowrap';
+                //             return div;
+                //         }
+                // minimize: true
             }, {
-                title: 'Long',
-                getData: (row) => {
-                        const div = document.createElement('div');
-                        div.innerHTML = row.long;
-                        div.style.whiteSpace = 'nowrap';
-                        return div;
-                    }
-                    // minimize: true
+                title: 'Calculator',
+                calculator: {
+                    sort: true
+                }
             }];
 
             const options = {
@@ -142,7 +147,8 @@
                 tr: {
                     classes: ['bg-dark']
                 },
-                caption: 'Go fuck yourself'
+                caption: 'Go fuck yourself',
+                invert: true
             }
 
             const myTable = new Table(table, headers, data, options);
