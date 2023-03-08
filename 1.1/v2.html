@@ -25,8 +25,8 @@
         <div class="container">
 
             <div class="table-responsive">
-            <table>
-            </table>
+                <table>
+                </table>
             </div>
         </div>
 
@@ -64,11 +64,12 @@
                 title: 'ID',
                 getData: (row) => row.id,
                 frozen: true
-                // minimize: true
+                    // minimize: true
             }, {
                 title: 'Name',
                 getData: (row) => row.name,
-                // minimize: true
+                tooltip: (row) => row.name
+                    // minimize: true
             }, {
                 title: 'Age',
                 getData: (row) => row.age,
@@ -97,12 +98,12 @@
             }, {
                 title: 'Long',
                 getData: (row) => {
-                    const div = document.createElement('div');
-                    div.innerHTML = row.long;
-                    div.style.whiteSpace = 'nowrap';
-                    return div;
-                }
-                // minimize: true
+                        const div = document.createElement('div');
+                        div.innerHTML = row.long;
+                        div.style.whiteSpace = 'nowrap';
+                        return div;
+                    }
+                    // minimize: true
             }];
 
             const options = {

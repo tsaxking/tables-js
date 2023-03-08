@@ -1267,13 +1267,21 @@ class Table {
 
                 try {
                     if (tooltip) {
-                        const tooltip = tooltip(row, h.title || h.name || h.key);
-                        if (tooltip) {
-                            c.el.title = tooltip;
+                        const tt = tooltip(row, h.title || h.name || h.key);
+                        if (tt) {
+                            c.el.title = tt;
                             tdTooltip = true;
+
+                            $(c.el).tooltip({
+                                title: tt,
+                                placement: 'top',
+                                trigger: 'hover'
+                            });
                         }
                     }
-                } catch {}
+                } catch (e) {
+                    console.error(e);
+                }
 
                 return c;
             }).filter(c => c));
