@@ -51,6 +51,269 @@ const parseHTML = (str) => {
     return div.firstChild;
 }
 
+class RenderedTable {
+    /**
+     * 
+     * @param {HTMLTableElement} table table to render 
+     */
+    constructor(table) {
+        if (!(table instanceof HTMLTableElement)) {
+            throw new Error('Invalid table element');
+        }
+
+        this.table = table;
+
+        this.rows = [];
+
+        this.render();
+    }
+
+    render() {
+        this.rows = Array.from(this.table.querySelectorAll('tbody tr')).map((row, i) => {
+            return new RenderedTableRow(row, i);
+        });
+
+        this.rows.forEach(r => r.render());
+    }
+
+    sort(columnIndex, ascending = true) {
+        this.rows.sort((a, b) => {
+            const aCell = a.cells[columnIndex];
+            const bCell = b.cells[columnIndex];
+
+            if (aCell === undefined || bCell === undefined) {
+                throw new Error('Invalid column index');
+            }
+
+            const aContent = aCell.cell.textContent;
+            const bContent = bCell.cell.textContent;
+
+            if (aContent > bContent) {
+                return ascending ? 1 : -1;
+            } else if (aContent < bContent) {
+                return ascending ? -1 : 1;
+            } else {
+                return 0;
+            }
+        });
+
+        this.table.querySelector('tbody').innerHTML = '';
+
+        this.rows.forEach((r, i) => {
+            this.table.querySelector('tbody').appendChild(r.row);
+        });
+    }
+}
+
+class RenderedTableRow {
+    /**
+     * 
+     * @param {HTMLTableRowElement} row row to render
+     * @param {Number} index index of the row
+     */
+    constructor(row, index) {
+        if (!(row instanceof HTMLTableRowElement)) {
+            throw new Error('Invalid row element');
+        }
+
+        this.row = row;
+        this.index = index;
+
+        this.cells = [];
+    }
+
+    render() {
+        this.cells = Array.from(this.row.cells).map((cell, i) => {
+            return new RenderedTableCell(cell, i);
+        });
+    }
+}
+
+class RenderedTableCell {
+    /**
+     * 
+     * @param {HTMLTableCellElement} cell cell to render
+     * @param {Number} index index of the cell
+     */
+    constructor(cell, index) {
+        if (!(cell instanceof HTMLTableCellElement)) {
+            throw new Error('Invalid cell element');
+        }
+
+        this.cell = cell;
+        this.index = index;
+    }
+}
+
+class Table_Calculator {
+    constructor(index) {
+        this.el = parseHTML(`<input class="form-control" type="text">`);
+        this.headerIndex = index;
+
+        this.listeners = [];
+    }
+
+    /**
+     * 
+     * @param  {...TableCell} cells Table Cells to run the calculator on
+     */
+    run(...cells) {
+        let { value } = this.el;
+        // input is a string
+        // {1} + 2 / ({4} * 8)
+        // cells[0].content + 2 / (cells[3].content * 8)
+
+        const regex = /{(\d+)}/g;
+        let match;
+        while (match = regex.exec(value)) {
+            const index = +match[1];
+            if (this.headerIndex == index) {
+                throw new Error('Cannot reference self');
+            }
+            const cell = cells[index];
+            if (!cell) {
+                throw new Error('Invalid cell index: ' + index);
+            }
+            value = value.replace(match[0], cell.content);
+        }
+
+        try {
+            return Table_Calculator.evaluate(value);
+        } catch {
+            return 'Invalid Input';
+        }
+    }
+
+    /**
+     * 
+     * @param {String} str string to evaluate
+     * @returns 
+     */
+    static evaluate = (str) => {
+        str = str.replace(/\s/g, '');
+        const evaluate = (str) => {
+            if (str.includes('(')) {
+                str = getParentheses(str);
+            };
+            const operators = ['^', '*', '/', '+', '-'];
+
+            return operators.reduce((acc, operator) => {
+                const run = (str) => {
+                    const index = str.lastIndexOf(operator);
+                    if (index === -1) {
+                        return str;
+                    }
+
+                    const replace = (str, index, operator) => {
+                        const leftIndex = (() => {
+                            let i = index - 1;
+                            // get the left full number (including decimals)
+                            while (i >= 0 && !isNaN(+str[i]) || str[i] === '.') {
+                                i--;
+                            }
+                            return i + 1;
+                        })();
+
+                        const rightIndex = (() => {
+                            let i = index + 1;
+                            // get the right full number (including decimals)
+                            while (i < str.length && !isNaN(+str[i]) || str[i] === '.') {
+                                i++;
+                            }
+                            return i;
+                        })();
+
+
+                        const left = +str.substring(leftIndex, index);
+                        const right = +str.substring(index + 1, rightIndex);
+
+                        const test = (input) => {
+                            return true;
+                        }
+
+                        if (!test(left) || !test(right)) {
+                            throw new Error('Invalid input', left, right, str);
+                        }
+
+                        // console.log(left, operator, right);
+
+                        const result = (() => {
+                            switch (operator) {
+                                case '^':
+                                    return Math.pow(left, right);
+                                case '*':
+                                    return left * right;
+                                case '/':
+                                    return left / right;
+                                case '+':
+                                    return +left + +right;
+                                case '-':
+                                    return left - right;
+                            }
+                        })();
+
+                        return str.substring(0, leftIndex) + result + str.substring(rightIndex);
+                    }
+
+                    str = replace(str, index, operator);
+                    if (str.includes(operator)) {
+                        return run(str);
+                    }
+                    return str;
+                }
+                return run(acc);
+            }, str);
+        }
+
+        const getParentheses = (str) => {
+            // get innermost parentheses
+            const start = str.lastIndexOf('(');
+            const end = str.indexOf(')', start);
+            const inner = str.substring(start + 1, end);
+
+            // evaluate innermost parentheses
+            const result = evaluate(inner);
+
+            // replace innermost parentheses with result
+            str = str.substring(0, start) + result + str.substring(end + 1);
+
+            // if there are still parentheses, evaluate again
+            if (str.includes('(')) {
+                return getParentheses(str);
+            }
+
+            return str;
+        };
+
+        const result = evaluate(str);
+        if (isNaN(result)) {
+            throw new Error('Invalid input: evaluated to: ' + result);
+        }
+        return +result;
+    }
+
+    setCells(rows, cb = () => {}) {
+        const listener = (e) => {
+            if (e.key === 'Enter') {
+                rows.forEach(row => {
+                    row.cells[this.headerIndex].el.innerHTML = this.run(...row.cells);
+                });
+                cb();
+            }
+        }
+
+        this.el.addEventListener('keypress', listener);
+
+        return () => {
+            this.el.removeEventListener('keypress', listener);
+        }
+    }
+
+    on(event, cb) {}
+
+    off(event, cb) {}
+}
+
 
 /**
  *  A class that handles the state of a table
@@ -300,9 +563,12 @@ class Table {
      * 
      * @param {Object[]} headers The headers for the table
      * 
+     * @param {Object} headers[].calculator Whether or not this column is a calculator column (td elements are input:text elements)
+     * 
      * @param {String} headers[].title The title of the header
      * @param {String} headers[].name The name of the header (used the same as title)
      * @param {String} headers[].key The key of the header (used the same as name)
+     * @param {Boolean} headers[].frozen Whether or not the column is frozen (prevents it from scrolling horizontally)
      * 
      * @param {Function} headers[].getData A function that returns the data for the td element (takes in the row data)
      * @param {Function} headers[].sort A function that returns the data for the column (takes in (TableRow, TableRow))
@@ -448,8 +714,8 @@ class Table {
     constructor(table, headers, data, options) {
         if (typeof table === 'string') table = document.querySelector(table);
 
-        if (!table || !table.querySelector) {
-            throw new Error('Table must be an HTML element');
+        if (!table instanceof HTMLTableElement) {
+            throw new Error('Table must be an HTML Table Element');
         }
 
         if (!headers) {
@@ -561,6 +827,12 @@ class Table {
         this.stack.onReject = () => {};
 
         if (this.options.__render !== false) this.stack.addState(this);
+
+        /**
+         * The listeners for the table
+         * @type {Array<event: String, callback: Function, options: Object>}
+         */
+        this.listeners = [];
     }
 
     /**
@@ -975,11 +1247,34 @@ class Table {
             if (!h) return;
             const th = new TableHeader(h.title);
 
+            if (h.calculator) {
+                const { calculator } = h;
+
+                h.calculator = new Table_Calculator(i);
+                const th = new TableHeader(h.calculator.el);
+                th.calculator = h.calculator;
+                if (typeof calculator == 'object') {
+
+                }
+                this.tableHeaders.cells.push(th);
+                tr.appendChild(th.el);
+                return new TableColumn([th], h);
+            }
+
             const {
                 minimize,
                 sort,
-                th: _thInfo
+                th: _thInfo,
+                frozen
             } = h;
+
+            if (frozen) {
+                if (i !== 0) console.warn('Frozen columns must be the first column in the table. Ignoring frozen column.');
+                // freeze the column
+                th.el.style.position = 'sticky';
+                th.el.style.left = '0';
+                th.el.style.zIndex = '1';
+            }
 
             let thClasses,
                 thAttributes;
@@ -1147,6 +1442,18 @@ class Table {
             const r = new TableRow(this.headers.map((h, j) => {
                 if (!h) return;
                 colPos++;
+
+                if (h.calculator) {
+                    h.getData = () => { return '' };
+                    const td = new TableCell('td', h, row, {
+                        rowPos: i,
+                        colPos,
+                        header: h.title || h.name || h.key
+                    });
+                    td.el.innerText = "";
+                    return td;
+                }
+
                 const c = new TableCell('td', h, row, {
                     rowPos: i,
                     colPos,
@@ -1156,8 +1463,16 @@ class Table {
                 });
 
                 const {
-                    td
+                    td,
+                    frozen
                 } = h;
+
+                if (frozen) {
+                    if (j !== 0) console.warn('Frozen columns must be the first column in the table');
+                    c.el.style.position = 'sticky';
+                    c.el.style.zIndex = 1;
+                    c.el.style.left = 0;
+                }
 
                 let listeners,
                     attributes,
@@ -1338,6 +1653,13 @@ class Table {
 
             if (r.insertRows.above) r.insertRows.above.row = r;
             if (r.insertRows.below) r.insertRows.below.row = r;
+        });
+
+        this.headers.forEach((h, i) => {
+            if (h.calculator) {
+                console.log(h);
+                h.calculator.setCells(this.rows);
+            }
         });
 
         this.el.appendChild(tbody);
@@ -1614,6 +1936,15 @@ class Table {
         const json = JSON.stringify(parseSV(data, '\t', '"'));
         return Table.fromJSON(table, json, options);
     }
+
+    get renderedTable() {
+        return new RenderedTable(this.el);
+    }
+
+    reset() {
+        this.el.innerHTML = '';
+        this.render();
+    }
 }
 
 /**
@@ -1722,13 +2053,16 @@ class TableCell {
         rowPos,
         colPos,
         minimized,
-        editable
+        editable,
+        frozen
     }) {
+        console.log(header);
         this.content = header.getData ? header.getData(row) : row[header.title || header.name || header.key];
         this.type = type;
         this.colPos = colPos;
         this.rowPos = rowPos;
         this.headerTitle = header.title;
+        this.frozen = frozen;
         this.header = header;
         this.editable = editable;
         this.onChange = editable ? editable.onChange : () => {};
@@ -1765,7 +2099,6 @@ class TableCell {
         this.el.dataset.colPos = this.colPos;
         this.el.dataset.rowPos = this.rowPos;
         this.el.dataset.header = this.headerTitle;
-
 
         if (this.content.querySelector) {
             if (this.editable) throw new Error('Editable cells cannot contain HTML elements');
