@@ -1,6 +1,6 @@
 {
     "name": "tables-js",
-    "version": "1.1.16",
+    "version": "1.1.18",
     "description": "Simple, dynamic, and customizable HTML table generator for vanilla JavaScript. Includes CSV, TSV, and JSON to HTML table conversion.",
     "author": "",
     "license": "ISC",

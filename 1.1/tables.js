@@ -36,7 +36,7 @@ const parseSV = (str, delimeter, escape) => {
             }
         });
 
-        console.log(splitRow);
+        // console.log(splitRow);
 
         return splitRow.reduce((acc, curr, i) => {
             acc[headers[i]] = curr.trim();
@@ -55,8 +55,9 @@ class RenderedTable {
     /**
      * 
      * @param {HTMLTableElement} table table to render 
+     * @param {Boolean} render whether to render the table or not
      */
-    constructor(table) {
+    constructor(table, render = true) {
         if (!(table instanceof HTMLTableElement)) {
             throw new Error('Invalid table element');
         }
@@ -65,7 +66,7 @@ class RenderedTable {
 
         this.rows = [];
 
-        this.render();
+        if (render) this.render();
     }
 
     render() {
@@ -102,6 +103,53 @@ class RenderedTable {
         this.rows.forEach((r, i) => {
             this.table.querySelector('tbody').appendChild(r.row);
         });
+    }
+
+    invert() {
+        // console.log('inverting...');
+        // switch x and y axis
+        const rows = new Array(this.rows[0].cells.length).fill(null).map(() => []);
+
+        const ths = Array.from(this.table.querySelectorAll('thead th')).map((th, i) => {
+            if (th.children.length) {
+                return th.children[0];
+            } else return th.innerHTML;
+        });
+
+        this.rows.forEach((row, i) => {
+            row.cells.forEach((cell, j) => {
+                if (i === 0) {
+                    const th = document.createElement('th');
+                    if (typeof ths[j] === 'string') {
+                        th.innerHTML = ths[j];
+                    } else {
+                        th.appendChild(ths[j]);
+                    }
+                    rows[j].push(th);
+                }
+
+                const td = document.createElement('td');
+                td.innerHTML = cell.cell.innerHTML;
+                rows[j].push(td);
+            });
+        });
+
+        this.table.querySelector('thead').innerHTML = '';
+        this.table.querySelector('tbody').innerHTML = '';
+
+        rows.forEach((row, i) => {
+            const tr = document.createElement('tr');
+            row.forEach(cell => {
+                tr.appendChild(cell);
+            });
+            if (i === 0) {
+                this.table.querySelector('thead').appendChild(tr);
+            } else {
+                this.table.querySelector('tbody').appendChild(tr);
+            }
+        });
+
+        this.render();
     }
 }
 
@@ -437,6 +485,8 @@ class Table {
      * @param {Object} options.editable Options for the editable functionality, applies contenteditable="true" to all td elements. Each getData() in the header must return a string
      * @param {Function} options.onChange The function to call when the data changes
      * @param {Function} options.onCancel The function to call when the data changes
+     * 
+     * @param {Boolean} options.invert Inverts the table, first column is the headers, first row is the data
      * 
      * 
      * // TODO: do all of these below here
@@ -936,6 +986,11 @@ class Table {
         if (this.options.dataTable || this.options.datatable) {
             $(this.el).DataTable(this.options.dataTable || this.options.datatable);
         }
+
+
+        if (this.options.invert) {
+            this.renderedTable.invert();
+        }
     }
 
     /**
@@ -950,7 +1005,7 @@ class Table {
      * table.showInsertRows(table.rows[0]);
      */
     showInsertRows(row) {
-        console.log('Showing insert rows', row);
+        // console.log('Showing insert rows', row);
         row.insertRows.above.show();
         row.insertRows.below.show();
 
@@ -1336,13 +1391,21 @@ class Table {
 
                 try {
                     if (tooltip) {
-                        const tooltip = tooltip(row, h.title || h.name || h.key);
-                        if (tooltip) {
-                            c.el.title = tooltip;
+                        const tt = tooltip(row, h.title || h.name || h.key);
+                        if (tt) {
+                            c.el.title = tt;
                             tdTooltip = true;
+
+                            $(c.el).tooltip({
+                                title: tt,
+                                placement: 'top',
+                                trigger: 'hover'
+                            });
                         }
                     }
-                } catch {}
+                } catch (e) {
+                    console.error(e);
+                }
 
                 return c;
             }).filter(c => c));
@@ -1429,7 +1492,7 @@ class Table {
 
         this.headers.forEach((h, i) => {
             if (h.calculator) {
-                console.log(h);
+                // console.log(h);
                 h.calculator.setCells(this.rows);
             }
         });
@@ -1828,7 +1891,7 @@ class TableCell {
         editable,
         frozen
     }) {
-        console.log(header);
+        // console.log(header);
         this.content = header.getData ? header.getData(row) : row[header.title || header.name || header.key];
         this.type = type;
         this.colPos = colPos;
@@ -1847,7 +1910,7 @@ class TableCell {
         this.stack.addState(this.content);
 
         this.stack.onChange = (state) => {
-            console.log('state changed');
+            // console.log('state changed');
             this.content = state;
 
             this.render();
@@ -1856,7 +1919,7 @@ class TableCell {
         this.stack.onChangeUnsaved = (state) => {
             if (!this.viewingUnsaved) return;
             if (state || state == '') {
-                console.log('Rendering unsaved state: ', state);
+                // console.log('Rendering unsaved state: ', state);
                 this.el.innerText = state;
             }
         }
@@ -1937,7 +2000,7 @@ Leaving the cell will cancel the changes
                         e.preventDefault();
                         this.viewingUnsaved = true;
                         this.stack.resolveUnsaved();
-                        console.log(this.stack.currentUnsavedState, this.stack.currentUnsavedIndex);
+                        // console.log(this.stack.currentUnsavedState, this.stack.currentUnsavedIndex);
                         switch (e.key) {
                             case 'ArrowUp':
                                 e.preventDefault();

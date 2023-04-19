@@ -31,125 +31,158 @@
         </div>
 
         <script>
-            const data = new Array(100).fill().map((_, i) => ({
-                id: i,
-                name: `Name ${i}`,
-                age: Math.floor(Math.random() * 100),
-                food: [
-                    'apple',
-                    'banana',
-                    'orange',
-                    'pear',
-                    'grape',
-                    'pineapple'
-                ][Math.floor(Math.random() * 6)],
-                color: [
-                    'red',
-                    'orange',
-                    'yellow',
-                    'green',
-                    'blue',
-                    'indigo',
-                    'violet'
-                ][Math.floor(Math.random() * 7)],
-                date: Date.now() - Math.floor(Math.random() * 10000000000),
-                bool: Math.random() > 0.5,
-                bool2: Math.random() > 0.5,
-                long: new Array(100).fill('AA').map((_, i) => i).join(', ')
-            }));
-
-            const table = document.querySelector('table');
-
-            const headers = [{
-                title: 'ID',
-                getData: (row) => row.id,
-                frozen: true
-                    // minimize: true
+            const rows = [{
+                a: 1,
+                b: 2
             }, {
-                title: 'Name',
-                getData: (row) => row.name,
-                // minimize: true
+                a: 3,
+                b: 4
             }, {
-                title: 'Age',
-                getData: (row) => row.age,
-                // sort: (a, b) => a.data.age - b.data.age
-            }, {
-                title: 'Food',
-                getData: (row) => row.food,
-                // sort: (a, b) => a.data.food.localeCompare(b.data.food)
-            }, {
-                title: 'Color',
-                getData: (row) => row.color,
-                // sort: (a, b) => a.data.color.localeCompare(b.data.color)
-            }, {
-                title: 'Date',
-                getData: (row) => row.date,
-                // sort: (a, b) => a.data.date - b.data.date,
-                // minimize: true
-            }, {
-                title: 'Bool1',
-                getData: (row) => row.bool,
-                // sort: (a, b) => a.data.bool - b.data.bool
-            }, {
-                title: 'Bool2',
-                getData: (row) => row.bool2,
-                // sort: true
-                // }, {
-                //     title: 'Long',
-                //     getData: (row) => {
-                //             const div = document.createElement('div');
-                //             div.innerHTML = row.long;
-                //             div.style.whiteSpace = 'nowrap';
-                //             return div;
-                //         }
-                // minimize: true
-            }, {
-                title: 'Calculator',
-                calculator: {
-                    sort: true
-                }
+                a: 5,
+                b: 6
             }];
+            const columns = [{
+                title: "A",
+                getData: (row) => row.a
+            }, {
+                title: "B",
+                getData: (row) => row.b
+            }]
 
-            const options = {
+            new Table('table', columns, rows, {
+                invert: true,
                 classes: [
                     'table',
                     'table-striped',
                     'table-hover',
                     'table-bordered',
                     'table-dark'
-                ],
-                // reorder: {
-                //     handle: `<i class="material-icons">drag_indicator</i>`,
-                //     listeners: {
-                //         onDragStart: (event) => {},
-                //         onDragEnd: (event) => {},
-                //         onDrop: (event) => {},
-                //         onDrag: (event) => {},
-                //         onDragEnter: (event) => {},
-                //         onDragLeave: (event) => {}
-                //     },
-                //     tdClassChanges: {
-                //         swap: ['bg-primary'],
-                //         insert: ['bg-success'],
-                //         dragging: ['bg-warning'],
-                //         tempTr: ['bg-light']
-                //     }
-                // },
-                fixedHeaders: true,
-                // sort: {
-                //     classes: ['text-info']
-                // },
-                // editable: {
-                //     onChange: (event) => {},
-                //     onCancel: (event) => {}
-                // },
-                tr: {
-                    classes: ['bg-dark']
-                },
-                caption: 'Go fuck yourself'
-            }
+                ]
+            });
+        </script>
 
-            const myTable = new Table(table, headers, data, options);
+        <script>
+            // const data = new Array(100).fill().map((_, i) => ({
+            //     id: i,
+            //     name: `Name ${i}`,
+            //     age: Math.floor(Math.random() * 100),
+            //     food: [
+            //         'apple',
+            //         'banana',
+            //         'orange',
+            //         'pear',
+            //         'grape',
+            //         'pineapple'
+            //     ][Math.floor(Math.random() * 6)],
+            //     color: [
+            //         'red',
+            //         'orange',
+            //         'yellow',
+            //         'green',
+            //         'blue',
+            //         'indigo',
+            //         'violet'
+            //     ][Math.floor(Math.random() * 7)],
+            //     date: Date.now() - Math.floor(Math.random() * 10000000000),
+            //     bool: Math.random() > 0.5,
+            //     bool2: Math.random() > 0.5,
+            //     long: new Array(100).fill('AA').map((_, i) => i).join(', ')
+            // }));
+
+            // const table = document.querySelector('table');
+
+            // const headers = [{
+            //     title: 'ID',
+            //     getData: (row) => row.id,
+            //     frozen: true
+            //         // minimize: true
+            // }, {
+            //     title: 'Name',
+            //     getData: (row) => row.name,
+            //     tooltip: (row) => row.name
+            //         // minimize: true
+            // }, {
+            //     title: 'Age',
+            //     getData: (row) => row.age,
+            //     // sort: (a, b) => a.data.age - b.data.age
+            // }, {
+            //     title: 'Food',
+            //     getData: (row) => row.food,
+            //     // sort: (a, b) => a.data.food.localeCompare(b.data.food)
+            // }, {
+            //     title: 'Color',
+            //     getData: (row) => row.color,
+            //     // sort: (a, b) => a.data.color.localeCompare(b.data.color)
+            // }, {
+            //     title: 'Date',
+            //     getData: (row) => row.date,
+            //     // sort: (a, b) => a.data.date - b.data.date,
+            //     // minimize: true
+            // }, {
+            //     title: 'Bool1',
+            //     getData: (row) => row.bool,
+            //     // sort: (a, b) => a.data.bool - b.data.bool
+            // }, {
+            //     title: 'Bool2',
+            //     getData: (row) => row.bool2,
+            //     // sort: true
+            //     // }, {
+            //     //     title: 'Long',
+            //     //     getData: (row) => {
+            //     //             const div = document.createElement('div');
+            //     //             div.innerHTML = row.long;
+            //     //             div.style.whiteSpace = 'nowrap';
+            //     //             return div;
+            //     //         }
+            //     // minimize: true
+            // }, {
+            //     title: 'Calculator',
+            //     calculator: {
+            //         sort: true
+            //     }
+            // }];
+
+            // const options = {
+            //     classes: [
+            //         'table',
+            //         'table-striped',
+            //         'table-hover',
+            //         'table-bordered',
+            //         'table-dark'
+            //     ],
+            //     // reorder: {
+            //     //     handle: `<i class="material-icons">drag_indicator</i>`,
+            //     //     listeners: {
+            //     //         onDragStart: (event) => {},
+            //     //         onDragEnd: (event) => {},
+            //     //         onDrop: (event) => {},
+            //     //         onDrag: (event) => {},
+            //     //         onDragEnter: (event) => {},
+            //     //         onDragLeave: (event) => {}
+            //     //     },
+            //     //     tdClassChanges: {
+            //     //         swap: ['bg-primary'],
+            //     //         insert: ['bg-success'],
+            //     //         dragging: ['bg-warning'],
+            //     //         tempTr: ['bg-light']
+            //     //     }
+            //     // },
+            //     fixedHeaders: true,
+            //     // sort: {
+            //     //     classes: ['text-info']
+            //     // },
+            //     // editable: {
+            //     //     onChange: (event) => {},
+            //     //     onCancel: (event) => {}
+            //     // },
+            //     tr: {
+            //         classes: ['bg-dark']
+            //     },
+            //     caption: 'Go fuck yourself',
+            //     invert: true
+            // }
+
+            // const myTable = new Table(table, headers, data, options);
             // const myTable = new Table(table, headers, data, {
             //     datatable: {
             //         autofill: true
